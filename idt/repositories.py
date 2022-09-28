@@ -1,10 +1,10 @@
-from typing import Mapping, Sequence, Type
+from typing import Sequence, Type
 import uuid
 
-from idt.domains import Device
+from idt.domains import Device, TypeDevices
 
 
-_DEVICES: Mapping[str, Type[Device]] = {}
+_DEVICES: TypeDevices = {}
 
 
 class DeviceRepository:

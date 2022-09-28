@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Mapping, Optional, Sequence, Type
 
@@ -8,8 +8,8 @@ TypeHubs = Sequence["Hub"]
 
 @dataclass(kw_only=True)
 class Device:
-    id: str
-    hub: Optional["Hub"]
+    id: Optional[str] = None
+    hub: Optional["Hub"] = None
 
 
 class SwitchState(Enum):
@@ -19,7 +19,7 @@ class SwitchState(Enum):
 
 @dataclass(kw_only=True)
 class Switch(Device):
-    state: SwitchState
+    state: SwitchState = SwitchState.OFF
 
 
 @dataclass(kw_only=True)
@@ -34,8 +34,8 @@ class LockState(Enum):
 
 @dataclass(kw_only=True)
 class Lock(Device):
-    state: LockState
-    code: Sequence[str]
+    state: LockState = LockState.UNLOCKED
+    code: Sequence[str] = field(default_factory=list)
 
 
 @dataclass(kw_only=True)
@@ -46,9 +46,9 @@ class Thermostat(Device):
 
 @dataclass(kw_only=True)
 class Hub:
-    id: str
-    devices: TypeDevices
-    dwelling: Optional["Dwelling"]
+    id: Optional[str] = None
+    devices: TypeDevices = field(default_factory=list)
+    dwelling: Optional["Dwelling"] = None
 
     def __post_init__(self):
         for device in self.devices:
@@ -57,8 +57,8 @@ class Hub:
 
 @dataclass(kw_only=True)
 class Dwelling:
-    id: str
-    hubs: TypeHubs
+    id: Optional[str] = None
+    hubs: TypeHubs = field(default_factory=list)
 
     def __post_init__(self):
         for hub in self.hubs:
