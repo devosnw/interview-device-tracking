@@ -1,10 +1,8 @@
 from typing import Mapping
-from unittest import mock
-from weakref import KeyedRef
 import pytest
 from pytest_mock import MockerFixture
 
-from idt.domains.devices import Device
+from idt.domains import Device
 from idt.repositories import DeviceRepository
 
 

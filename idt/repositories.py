@@ -1,7 +1,7 @@
 from typing import Mapping, Sequence, Type
 import uuid
 
-from idt.domains.devices import Device
+from idt.domains import Device
 
 
 _DEVICES: Mapping[str, Type[Device]] = {}
