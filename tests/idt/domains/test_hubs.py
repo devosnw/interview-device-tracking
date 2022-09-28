@@ -3,9 +3,15 @@ from idt.domains.hubs import Hub
 
 
 class TestHub:
-    def test_init(self):
-        devices = [Switch(), Dimmer()]
+    class TestInit:
+        def test_defaults(self):
+            hub = Hub()
 
-        hub = Hub(devices=devices)
+            assert hub.devices == []
 
-        assert hub.devices == devices
+        def test_fields(self):
+            devices = [Switch(), Dimmer()]
+
+            hub = Hub(devices=devices)
+
+            assert hub.devices == devices
