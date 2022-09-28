@@ -19,8 +19,8 @@ class DeviceRepository:
     def delete(self):
         raise NotImplementedError()
 
-    def get(self):
-        raise NotImplementedError()
+    def get(self, id_: str) -> Device:
+        return _DEVICES[id_]
 
     def list(self):
         raise NotImplementedError()

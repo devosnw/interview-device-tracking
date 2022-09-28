@@ -1,3 +1,5 @@
+from typing import Mapping
+from weakref import KeyedRef
 import pytest
 from pytest_mock import MockerFixture
 
@@ -13,6 +15,11 @@ def device_repository() -> DeviceRepository:
 @pytest.fixture
 def device() -> Device:
     return Device()
+
+
+@pytest.fixture
+def mock_devices(mocker: MockerFixture):
+    return mocker.patch.dict("idt.repositories._DEVICES")
 
 
 class TestDeviceRepository:
@@ -33,11 +40,30 @@ class TestDeviceRepository:
             mocker: MockerFixture,
             device_repository: DeviceRepository,
             device: Device,
+            mock_devices: Mapping,
         ):
             mocker.patch("idt.repositories.uuid.uuid4", return_value="def-a-uuid")
-            devices = mocker.patch.dict("idt.repositories._DEVICES")
 
             device = device_repository.create(device)
 
             assert device.id == "def-a-uuid"
-            assert devices == {"def-a-uuid": device}
+            assert mock_devices == {"def-a-uuid": device}
+
+    class TestGet:
+        @pytest.mark.usefixtures("mock_devices")
+        def test_not_found(self, device_repository: DeviceRepository):
+            with pytest.raises(KeyError) as e:
+                device_repository.get("not-here")
+
+            assert str(e.value) == "'not-here'"
+
+        def test_found(
+            self,
+            device_repository: DeviceRepository,
+            device: Device,
+            mock_devices: Mapping,
+        ):
+            device.id = "id"
+            mock_devices["id"] = device
+
+            assert device_repository.get("id") == device
