@@ -48,6 +48,26 @@ class TestDeviceRepository:
             assert device.id == "def-a-uuid"
             assert mock_devices == {"def-a-uuid": device}
 
+    class TestDelete:
+        @pytest.mark.usefixtures("mock_devices")
+        def test_not_found(self, device_repository: DeviceRepository):
+            with pytest.raises(KeyError) as e:
+                device_repository.delete("not-here")
+
+            assert str(e.value) == "'not-here'"
+
+        def test_found(
+            self,
+            device_repository: DeviceRepository,
+            device: Device,
+            mock_devices: Mapping,
+        ):
+            mock_devices["id"] = device
+
+            device_repository.delete("id")
+
+            assert mock_devices == {}
+
     class TestGet:
         @pytest.mark.usefixtures("mock_devices")
         def test_not_found(self, device_repository: DeviceRepository):
@@ -62,7 +82,6 @@ class TestDeviceRepository:
             device: Device,
             mock_devices: Mapping,
         ):
-            device.id = "id"
             mock_devices["id"] = device
 
             assert device_repository.get("id") == device

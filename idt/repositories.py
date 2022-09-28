@@ -16,8 +16,9 @@ class DeviceRepository:
         _DEVICES[device.id] = device
         return device
 
-    def delete(self):
-        raise NotImplementedError()
+    def delete(self, id_: str):
+        # TODO: if associated with hub, blow up
+        del _DEVICES[id_]
 
     def get(self, id_: str) -> Device:
         return _DEVICES[id_]
