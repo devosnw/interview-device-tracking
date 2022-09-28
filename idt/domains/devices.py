@@ -1,9 +1,10 @@
 from dataclasses import dataclass
+from typing import Optional
 
 
 @dataclass
 class Device:
-    pass
+    id: Optional[str] = None
 
 
 @dataclass

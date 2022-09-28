@@ -2,8 +2,16 @@ from idt.domains.devices import Device, Dimmer, Lock, Switch, Thermostat
 
 
 class TestDevice:
-    def test_init(self):
-        assert Device() is not None
+    class TestInit:
+        def test_defaults(self):
+            device = Device()
+
+            assert device.id is None
+
+        def test_fields(self):
+            device = Device(id="id")
+
+            assert device.id == "id"
 
 
 class TestSwitch:
