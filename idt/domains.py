@@ -1,37 +1,65 @@
-from dataclasses import dataclass, field
-from typing import Optional, Sequence, Type
+from dataclasses import dataclass
+from enum import Enum, auto
+from typing import Mapping, Optional, Sequence, Type
+
+TypeDevices = Mapping[str, Type["Device"]]
+TypeHubs = Sequence["Hub"]
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Device:
-    id: Optional[str] = None
+    id: str
+    hub: Optional["Hub"]
 
 
-@dataclass
+class SwitchState(Enum):
+    OFF = auto()
+    ON = auto()
+
+
+@dataclass(kw_only=True)
 class Switch(Device):
-    pass
+    state: SwitchState
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Dimmer(Device):
-    pass
+    brightness: int  # TODO: validate this within range with a setter
 
 
-@dataclass
+class LockState(Enum):
+    UNLOCKED = auto()
+    LOCKED = auto()
+
+
+@dataclass(kw_only=True)
 class Lock(Device):
-    pass
+    state: LockState
+    code: Sequence[str]
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Thermostat(Device):
-    pass
+    target_temp_f: float  # TODO: validate this within range with a setter
+    actual_temp_f: float  # TODO: validate this within range with a setter
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Hub:
-    devices: Sequence[Type[Device]] = field(default_factory=list)
+    id: str
+    devices: TypeDevices
+    dwelling: Optional["Dwelling"]
+
+    def __post_init__(self):
+        for device in self.devices:
+            device.hub = self
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Dwelling:
-    hubs: Sequence[Hub] = field(default_factory=list)
+    id: str
+    hubs: TypeHubs
+
+    def __post_init__(self):
+        for hub in self.hubs:
+            hub.dwelling = self
