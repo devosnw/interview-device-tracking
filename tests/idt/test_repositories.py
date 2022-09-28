@@ -1,4 +1,5 @@
 from typing import Mapping
+from unittest import mock
 from weakref import KeyedRef
 import pytest
 from pytest_mock import MockerFixture
@@ -67,3 +68,17 @@ class TestDeviceRepository:
             mock_devices["id"] = device
 
             assert device_repository.get("id") == device
+
+    class TestList:
+        def test_empty(self, device_repository: DeviceRepository):
+            assert device_repository.list() == []
+
+        def test_some(self, device_repository: DeviceRepository, mock_devices: Mapping):
+            device_1 = Device(id="1")
+            device_2 = Device(id="2")
+            mock_devices[device_1.id] = device_1
+            mock_devices[device_2.id] = device_2
+
+            devices = device_repository.list()
+
+            assert devices == [device_1, device_2]

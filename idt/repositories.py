@@ -1,4 +1,4 @@
-from typing import Mapping, Type
+from typing import Mapping, Sequence, Type
 import uuid
 
 from idt.domains.devices import Device
@@ -22,5 +22,5 @@ class DeviceRepository:
     def get(self, id_: str) -> Device:
         return _DEVICES[id_]
 
-    def list(self):
-        raise NotImplementedError()
+    def list(self) -> Sequence[Device]:
+        return [device for _, device in _DEVICES.items()]
