@@ -4,7 +4,7 @@ from typing import Mapping, Optional, Sequence, Type
 
 TypeDevice = Type["Device"]
 TypeDevices = Mapping[str, TypeDevice]
-TypeHubs = Sequence["Hub"]
+TypeHubs = Mapping[str, "Hub"]
 
 
 @dataclass(kw_only=True)
@@ -48,19 +48,19 @@ class Thermostat(Device):
 @dataclass(kw_only=True)
 class Hub:
     id: Optional[str] = None
-    devices: TypeDevices = field(default_factory=list)
+    devices: TypeDevices = field(default_factory=dict)
     dwelling: Optional["Dwelling"] = None
 
     def __post_init__(self):
-        for device in self.devices:
+        for device in self.devices.values():
             device.hub = self
 
 
 @dataclass(kw_only=True)
 class Dwelling:
     id: Optional[str] = None
-    hubs: TypeHubs = field(default_factory=list)
+    hubs: TypeHubs = field(default_factory=dict)
 
     def __post_init__(self):
-        for hub in self.hubs:
+        for hub in self.hubs.values():
             hub.dwelling = self

@@ -13,12 +13,8 @@ from idt.domains import (
 )
 
 
-def hub() -> Hub:
-    return Hub(id="id", devices=[], dwelling=None)
-
-
 class TestDevice:
-    @pytest.mark.parametrize("hub", [None, hub()])
+    @pytest.mark.parametrize("hub", [None, Hub()])
     @pytest.mark.parametrize("id_", [None, "id"])
     def test_init(self, id_, hub):
         device = Device(id=id_, hub=hub)
@@ -67,7 +63,7 @@ class TestThermostat:
 
 class TestHub:
     @pytest.mark.parametrize("dwelling", [None, Dwelling()])
-    @pytest.mark.parametrize("devices", [[], [Switch(), Lock()]])
+    @pytest.mark.parametrize("devices", [{}, {"1": Switch(), "2": Lock()}])
     @pytest.mark.parametrize("id_", [None, "id"])
     def test_init(self, id_, devices, dwelling):
         hub = Hub(id=id_, devices=devices, dwelling=dwelling)
@@ -76,12 +72,12 @@ class TestHub:
         assert hub.devices == devices
         assert hub.dwelling == dwelling
 
-        for device in hub.devices:
+        for device in hub.devices.values():
             assert device.hub == hub
 
 
 class TestDwelling:
-    @pytest.mark.parametrize("hubs", [[], [Hub(id="1"), Hub(id="2")]])
+    @pytest.mark.parametrize("hubs", [{}, {"1": Hub(), "2": Hub()}])
     @pytest.mark.parametrize("id_", [None, "id"])
     def test_init(self, id_, hubs):
         dwelling = Dwelling(id=id_, hubs=hubs)
@@ -89,5 +85,5 @@ class TestDwelling:
         assert dwelling.id == id_
         assert dwelling.hubs == hubs
 
-        for hub in dwelling.hubs:
+        for hub in dwelling.hubs.values():
             assert hub.dwelling == dwelling
