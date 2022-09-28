@@ -2,7 +2,8 @@ from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Mapping, Optional, Sequence, Type
 
-TypeDevices = Mapping[str, Type["Device"]]
+TypeDevice = Type["Device"]
+TypeDevices = Mapping[str, TypeDevice]
 TypeHubs = Sequence["Hub"]
 
 

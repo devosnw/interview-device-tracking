@@ -2,7 +2,7 @@ from typing import Mapping
 import pytest
 from pytest_mock import MockerFixture
 
-from idt.domains import Device
+from idt.domains import Device, Hub
 from idt.repositories import DeviceRepository
 
 
@@ -49,10 +49,21 @@ class TestDeviceRepository:
             assert mock_devices == {"def-a-uuid": device}
 
     class TestDelete:
+        def test_associated(self, device_repository: DeviceRepository, device: Device):
+            device.id = "id"
+            device.hub = Hub(id="hub_id")
+
+            with pytest.raises(ValueError) as e:
+                device_repository.delete(device)
+
+            assert str(e.value) == "Device associated with a hub id=id hub_id=hub_id"
+
         @pytest.mark.usefixtures("mock_devices")
-        def test_not_found(self, device_repository: DeviceRepository):
+        def test_not_found(self, device_repository: DeviceRepository, device: Device):
+            device.id = "not-here"
+
             with pytest.raises(KeyError) as e:
-                device_repository.delete("not-here")
+                device_repository.delete(device)
 
             assert str(e.value) == "'not-here'"
 
@@ -62,9 +73,10 @@ class TestDeviceRepository:
             device: Device,
             mock_devices: Mapping,
         ):
+            device.id = "id"
             mock_devices["id"] = device
 
-            device_repository.delete("id")
+            device_repository.delete(device)
 
             assert mock_devices == {}
 

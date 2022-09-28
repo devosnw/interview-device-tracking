@@ -1,14 +1,14 @@
-from typing import Sequence, Type
+from typing import Sequence
 import uuid
 
-from idt.domains import Device, TypeDevices
+from idt.domains import Device, TypeDevice, TypeDevices
 
 
 _DEVICES: TypeDevices = {}
 
 
 class DeviceRepository:
-    def create(self, device: Type[Device]):
+    def create(self, device: TypeDevice):
         if device.id is not None:
             raise ValueError(f"Device exists id={device.id}")
 
@@ -16,9 +16,12 @@ class DeviceRepository:
         _DEVICES[device.id] = device
         return device
 
-    def delete(self, id_: str):
-        # TODO: if associated with hub, blow up
-        del _DEVICES[id_]
+    def delete(self, device: TypeDevice):
+        if device.hub is not None:
+            raise ValueError(
+                f"Device associated with a hub id={device.id} hub_id={device.hub.id}"
+            )
+        del _DEVICES[device.id]
 
     def get(self, id_: str) -> Device:
         return _DEVICES[id_]
