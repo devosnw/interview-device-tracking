@@ -9,20 +9,24 @@ from idt.repositories import DeviceRepository, DwellingRepository, HubRepository
 class DeviceUsecases:
     repo: DeviceRepository
 
-    def create_device(self, device_cls: type[TypeDevice], **kwargs) -> TypeDevice:
-        return self.repo.create(device_cls(**kwargs))
+    def create_device(self, device_cls: type[TypeDevice], **attrs) -> TypeDevice:
+        return self.repo.create(device_cls(**attrs))
 
     def delete_device(self, id_: str):
         self.repo.delete(self.repo.get(id_))
 
     def show_device_info(self, id_: str) -> str:
-        pass
+        return str(self.repo.get(id_))
 
     def list_devices(self) -> Sequence[TypeDevice]:
-        pass
+        return self.repo.list()
 
-    def update_device(self, id_: str, **kwargs) -> str:
-        pass
+    def update_device(self, id_: str, **attrs) -> TypeDevice:
+        device = self.repo.get(id_)
+        for attr, value in attrs.items():
+            setattr(device, attr, value)
+        self.repo.save(device)
+        return device
 
 
 @dataclass

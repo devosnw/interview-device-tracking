@@ -1,3 +1,4 @@
+from asyncio import locks
 from typing import Mapping
 import pytest
 from pytest_mock import MockerFixture
@@ -5,6 +6,7 @@ from pytest_mock import MockerFixture
 from idt.domains import (
     Device,
     Dimmer,
+    Hub,
     Lock,
     LockState,
     Switch,
@@ -99,3 +101,51 @@ class TestDeviceUsecases:
             device_uc.delete_device("id")
 
             assert device_uc.repo.store.devices == {}
+
+    class TestShowDeviceInfo:
+        def test_not_there(self, device_uc: DeviceUsecases):
+            with pytest.raises(KeyError) as e:
+                device_uc.show_device_info("not-here")
+
+            assert str(e.value) == "'not-here'"
+
+        def test_success(self, device_uc: DeviceUsecases, device: Device):
+            device.id = "id"
+            device_uc.repo.store.devices[device.id] = device
+
+            info = device_uc.show_device_info("id")
+
+            assert info == "Device(id='id', hub=None)"
+
+    class TestListDevices:
+        def test_empty(self, device_uc: DeviceUsecases):
+            assert device_uc.list_devices() == []
+
+        def test_some(self, device_uc: DeviceUsecases):
+            device_1 = Device(id="1")
+            device_2 = Device(id="2")
+            device_uc.repo.store.devices = {
+                device_1.id: device_1,
+                device_2.id: device_2,
+            }
+
+            devices = device_uc.list_devices()
+
+            assert devices == [device_1, device_2]
+
+    class TestUpdateDevice:
+        def test_not_there(self, device_uc: DeviceUsecases):
+            with pytest.raises(KeyError) as e:
+                device_uc.update_device("not-here")
+
+            assert str(e.value) == "'not-here'"
+
+        def test_success(self, device_uc: DeviceUsecases):
+            device = Lock(id="id", state=LockState.UNLOCKED)
+            device_uc.repo.store.devices[device.id] = device
+            expected = Lock(id="id", state=LockState.LOCKED)
+
+            device = device_uc.update_device("id", state=LockState.LOCKED)
+
+            assert device == expected
+            assert device_uc.repo.store.devices == {expected.id: expected}
