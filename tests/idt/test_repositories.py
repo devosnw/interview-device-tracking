@@ -181,6 +181,22 @@ class TestDwellingRepository:
 
             assert dwelling_repo.get("id") == dwelling
 
+    class TestList:
+        def test_empty(self, dwelling_repo: DwellingRepository):
+            assert dwelling_repo.list() == []
+
+        def test_some(self, dwelling_repo: DwellingRepository):
+            dwelling_1 = Dwelling(id="1")
+            dwelling_2 = Dwelling(id="2")
+            dwelling_repo.store.dwellings = {
+                dwelling_1.id: dwelling_1,
+                dwelling_2.id: dwelling_2,
+            }
+
+            dwellings = dwelling_repo.list()
+
+            assert dwellings == [dwelling_1, dwelling_2]
+
     class TestSave:
         def test_success(self, dwelling_repo: DwellingRepository, dwelling: Dwelling):
             dwelling_repo.store.dwellings[dwelling.id] = dwelling

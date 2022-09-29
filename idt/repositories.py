@@ -61,6 +61,9 @@ class DwellingRepository:
     def get(self, id_: str) -> Dwelling:
         return self.store.dwellings[id_]
 
+    def list(self) -> Sequence[Dwelling]:
+        return [dwelling for _, dwelling in self.store.dwellings.items()]
+
     def save(self, dwelling: Dwelling):
         self.store.dwellings[dwelling.id] = dwelling
         for _, hub in dwelling.hubs.items():

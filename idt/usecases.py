@@ -56,14 +56,14 @@ class HubUsecases:
 class DwellingUsecases:
     repo: DwellingRepository
 
-    def add_hub_to_dwelling(self, hub: Hub, dwelling: Dwelling):
+    def install_hub(self, id_: str, hub_id: str):
         pass
 
-    def list_dwelling_hubs(self, id_: str) -> Sequence[Hub]:
+    def list_dwellings(self) -> Sequence[Dwelling]:
         pass
 
-    def occupy_dwelling(self, dwelling: Dwelling):
+    def occupy(self, id_: str):
         pass
 
-    def vacate_dwelling(self, dwelling: Dwelling):
+    def vacate(self, id_: str):
         pass
