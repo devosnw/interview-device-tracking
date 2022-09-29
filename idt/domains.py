@@ -23,7 +23,7 @@ class Switch(Device):
 
 @dataclass(kw_only=True)
 class Dimmer(Device):
-    brightness: int  # TODO: validate this within range with a setter
+    brightness: int = 0  # TODO: validate this within range with a setter
 
 
 class LockState(Enum):

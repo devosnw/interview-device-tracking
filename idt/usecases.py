@@ -10,7 +10,7 @@ class DeviceUsecases:
     repo: DeviceRepository
 
     def create_device(self, device_cls: type[TypeDevice], **kwargs) -> TypeDevice:
-        pass
+        return self.repo.create(device_cls(**kwargs))
 
     def delete_device(self, id_: str):
         pass
@@ -46,7 +46,7 @@ class DwellingUsecases:
     def add_hub_to_dwelling(self, hub: Hub, dwelling: Dwelling):
         pass
 
-    def list_dwelling_hubs(self, id_: str) -> Sequence(Hub):
+    def list_dwelling_hubs(self, id_: str) -> Sequence[Hub]:
         pass
 
     def occupy_dwelling(self, dwelling: Dwelling):
