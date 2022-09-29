@@ -75,6 +75,25 @@ class TestHub:
         for device in hub.devices.values():
             assert device.hub == hub
 
+    def test_pair_device(self):
+        hub = Hub()
+        device = Device(id="device-id")
+
+        hub.pair_device(device)
+
+        assert hub.devices == {device.id: device}
+        assert device.hub == hub
+
+    def test_unpair_device(self):
+        hub = Hub()
+        device = Device(id="device-id", hub=hub)
+        hub.devices = {"device-id": device}
+
+        hub.unpair_device(device)
+
+        assert hub.devices == {}
+        assert device.hub is None
+
 
 class TestDwelling:
     @pytest.mark.parametrize("hubs", [{}, {"1": Hub(), "2": Hub()}])

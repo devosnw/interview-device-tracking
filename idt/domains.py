@@ -53,6 +53,14 @@ class Hub:
         for device in self.devices.values():
             device.hub = self
 
+    def pair_device(self, device: TypeDevice):
+        self.devices[device.id] = device
+        device.hub = self
+
+    def unpair_device(self, device: TypeDevice):
+        device.hub = None
+        del self.devices[device.id]
+
 
 @dataclass(kw_only=True)
 class Dwelling:

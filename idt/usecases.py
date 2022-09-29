@@ -21,26 +21,35 @@ class DeviceUsecases:
     def list_devices(self) -> Sequence[TypeDevice]:
         return self.repo.list()
 
-    def update_device(self, id_: str, **attrs) -> TypeDevice:
+    def update_device(self, id_: str, **attrs):
         device = self.repo.get(id_)
         for attr, value in attrs.items():
             setattr(device, attr, value)
         self.repo.save(device)
-        return device
 
 
 @dataclass
 class HubUsecases:
     repo: HubRepository
+    device_repo: DeviceRepository
 
     def list_hub_devices(self, id_: str) -> Sequence[TypeDevice]:
-        pass
+        hub = self.repo.get(id_)
+        return [hub for _, hub in hub.devices.items()]
 
-    def pair_device_to_hub(self, device: TypeDevice, hub: Hub):
-        pass
+    def pair_device(self, id_: str, device_id: str):
+        hub = self.repo.get(id_)
+        device = self.device_repo.get(device_id)
 
-    def unpair_device_from_hub(self, device: TypeDevice, hub: Hub):
-        pass
+        hub.pair_device(device)
+        self.repo.save(hub)
+
+    def unpair_device(self, id_: str, device_id: str):
+        hub = self.repo.get(id_)
+        device = self.device_repo.get(device_id)
+
+        hub.unpair_device(device)
+        self.repo.save(hub)
 
 
 @dataclass

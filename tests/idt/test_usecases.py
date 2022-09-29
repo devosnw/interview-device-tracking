@@ -1,4 +1,3 @@
-from asyncio import locks
 from typing import Mapping
 import pytest
 from pytest_mock import MockerFixture
@@ -14,13 +13,13 @@ from idt.domains import (
     Thermostat,
     TypeDevice,
 )
-from idt.repositories import DeviceRepository, Store
-from idt.usecases import DeviceUsecases
+from idt.repositories import DeviceRepository, HubRepository, Store
+from idt.usecases import DeviceUsecases, HubUsecases
 
 
 @pytest.fixture
-def device_repo() -> DeviceRepository:
-    return DeviceRepository(Store())
+def device_repo(store) -> DeviceRepository:
+    return DeviceRepository(store)
 
 
 @pytest.fixture
@@ -34,8 +33,28 @@ def device() -> Device:
 
 
 @pytest.fixture
+def hub_repo(store) -> HubRepository:
+    return HubRepository(store)
+
+
+@pytest.fixture
+def hub_uc(hub_repo, device_repo) -> HubUsecases:
+    return HubUsecases(hub_repo, device_repo)
+
+
+@pytest.fixture
+def hub() -> Hub:
+    return Hub()
+
+
+@pytest.fixture
 def mock_uuid(mocker: MockerFixture):
     return mocker.patch("idt.repositories.uuid.uuid4", return_value="a-uuid")
+
+
+@pytest.fixture
+def store() -> Store:
+    return Store()
 
 
 class TestDeviceUsecases:
@@ -145,7 +164,93 @@ class TestDeviceUsecases:
             device_uc.repo.store.devices[device.id] = device
             expected = Lock(id="id", state=LockState.LOCKED)
 
-            device = device_uc.update_device("id", state=LockState.LOCKED)
+            device_uc.update_device("id", state=LockState.LOCKED)
 
-            assert device == expected
             assert device_uc.repo.store.devices == {expected.id: expected}
+
+
+class TestHubUsecases:
+    def test_init(self, hub_repo, device_repo):
+        assert HubUsecases(hub_repo, device_repo) is not None
+
+    class TestListHubDevices:
+        def test_not_there(self, hub_uc: HubUsecases):
+            with pytest.raises(KeyError) as e:
+                hub_uc.list_hub_devices("not-here")
+
+            assert str(e.value) == "'not-here'"
+
+        def test_empty(self, hub_uc: HubUsecases, hub: Hub):
+            hub.id = "id"
+            hub_uc.repo.store.hubs[hub.id] = hub
+
+            assert hub_uc.list_hub_devices("id") == []
+
+        def test_some(self, hub_uc: HubUsecases):
+            device_1 = Device(id="1")
+            device_2 = Device(id="2")
+            hub = Hub(
+                id="id",
+                devices={
+                    device_1.id: device_1,
+                    device_2.id: device_2,
+                },
+            )
+            hub_uc.repo.store.hubs[hub.id] = hub
+
+            assert hub_uc.list_hub_devices("id") == [device_1, device_2]
+
+    class TestPairDevice:
+        def test_not_there(self, hub_uc: HubUsecases):
+            with pytest.raises(KeyError) as e:
+                hub_uc.pair_device("not-here", "")
+
+            assert str(e.value) == "'not-here'"
+
+        def test_device_not_there(self, hub_uc: HubUsecases, hub: Hub):
+            hub.id = "id"
+            hub_uc.repo.store.hubs[hub.id] = hub
+
+            with pytest.raises(KeyError) as e:
+                hub_uc.pair_device("id", "not-here")
+
+            assert str(e.value) == "'not-here'"
+
+        def test_success(self, hub_uc: HubUsecases, hub: Hub, device: Device):
+            hub.id = "id"
+            hub_uc.repo.store.hubs[hub.id] = hub
+            device.id = "device-id"
+            hub_uc.device_repo.store.devices[device.id] = device
+
+            hub_uc.pair_device("id", "device-id")
+
+            assert hub_uc.repo.store.hubs["id"].devices == {device.id: device}
+            assert hub_uc.device_repo.store.devices["device-id"].hub == hub
+
+    class TestUnpairDevice:
+        def test_not_there(self, hub_uc: HubUsecases):
+            with pytest.raises(KeyError) as e:
+                hub_uc.unpair_device("not-here", "")
+
+            assert str(e.value) == "'not-here'"
+
+        def test_device_not_there(self, hub_uc: HubUsecases, hub: Hub):
+            hub.id = "id"
+            hub_uc.repo.store.hubs[hub.id] = hub
+
+            with pytest.raises(KeyError) as e:
+                hub_uc.unpair_device("id", "not-here")
+
+            assert str(e.value) == "'not-here'"
+
+        def test_success(self, hub_uc: HubUsecases, hub: Hub, device: Device):
+            device.id = "device-id"
+            hub.id = "id"
+            hub.pair_device(device)
+            hub_uc.device_repo.store.devices[device.id] = device
+            hub_uc.repo.store.hubs[hub.id] = hub
+
+            hub_uc.unpair_device("id", "device-id")
+
+            assert hub_uc.repo.store.hubs["id"].devices == {}
+            assert hub_uc.device_repo.store.devices["device-id"].hub is None
