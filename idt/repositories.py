@@ -1,30 +1,69 @@
-from typing import Sequence
+from dataclasses import dataclass, field
+from typing import Mapping, Sequence
 import uuid
 
-from idt.domains import Device, TypeDevice, TypeDevices
+from idt.domains import Device, Dwelling, Hub
 
 
-_DEVICES: TypeDevices = {}
+@dataclass
+class Store:
+    devices: Mapping[str, Device] = field(default_factory=dict)
+    dwellings: Mapping[str, Dwelling] = field(default_factory=dict)
+    hubs: Mapping[str, Hub] = field(default_factory=dict)
 
 
+@dataclass
 class DeviceRepository:
-    def create(self, device: TypeDevice):
+    store: Store
+
+    def create(self, device: Device):
         if device.id is not None:
-            raise ValueError(f"Device exists id={device.id}")
+            raise ValueError(f"Device exists: id={device.id}")
 
         device.id = uuid.uuid4()
-        _DEVICES[device.id] = device
+        self.save(device)
         return device
 
-    def delete(self, device: TypeDevice):
+    def delete(self, device: Device):
         if device.hub is not None:
             raise ValueError(
-                f"Device associated with a hub id={device.id} hub_id={device.hub.id}"
+                f"Device associated with a hub: id={device.id} hub_id={device.hub.id}"
             )
-        del _DEVICES[device.id]
+        del self.store.devices[device.id]
 
     def get(self, id_: str) -> Device:
-        return _DEVICES[id_]
+        return self.store.devices[id_]
 
     def list(self) -> Sequence[Device]:
-        return [device for _, device in _DEVICES.items()]
+        return [device for _, device in self.store.devices.items()]
+
+    def save(self, device: Device):
+        self.store.devices[device.id] = device
+
+
+@dataclass
+class HubRepository:
+    store: Store
+
+    def get(self, id_: str) -> Hub:
+        return self.store.hubs[id_]
+
+    def save(self, hub: Hub):
+        self.store.hubs[hub.id] = hub
+        for _, device in hub.devices.items():
+            self.store.devices[device.id] = device
+
+
+@dataclass
+class DwellingRepository:
+    store: Store
+
+    def get(self, id_: str) -> Dwelling:
+        return self.store.dwellings[id_]
+
+    def save(self, dwelling: Dwelling):
+        self.store.dwellings[dwelling.id] = dwelling
+        for _, hub in dwelling.hubs.items():
+            self.store.hubs[hub.id] = hub
+            for _, device in hub.devices.items():
+                self.store.devices[device.id] = device

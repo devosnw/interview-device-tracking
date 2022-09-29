@@ -1,10 +1,6 @@
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Mapping, Optional, Sequence, Type
-
-TypeDevice = Type["Device"]
-TypeDevices = Mapping[str, TypeDevice]
-TypeHubs = Mapping[str, "Hub"]
+from typing import Mapping, Optional, Sequence
 
 
 @dataclass(kw_only=True)
@@ -48,7 +44,7 @@ class Thermostat(Device):
 @dataclass(kw_only=True)
 class Hub:
     id: Optional[str] = None
-    devices: TypeDevices = field(default_factory=dict)
+    devices: Mapping[str, Device] = field(default_factory=dict)
     dwelling: Optional["Dwelling"] = None
 
     def __post_init__(self):
@@ -59,7 +55,7 @@ class Hub:
 @dataclass(kw_only=True)
 class Dwelling:
     id: Optional[str] = None
-    hubs: TypeHubs = field(default_factory=dict)
+    hubs: Mapping[str, Hub] = field(default_factory=dict)
 
     def __post_init__(self):
         for hub in self.hubs.values():
