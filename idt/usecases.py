@@ -13,7 +13,7 @@ class DeviceUsecases:
         return self.repo.create(device_cls(**kwargs))
 
     def delete_device(self, id_: str):
-        pass
+        self.repo.delete(self.repo.get(id_))
 
     def show_device_info(self, id_: str) -> str:
         pass

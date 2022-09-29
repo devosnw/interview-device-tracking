@@ -27,6 +27,11 @@ def device_uc(device_repo: DeviceRepository) -> DeviceUsecases:
 
 
 @pytest.fixture
+def device() -> Device:
+    return Device()
+
+
+@pytest.fixture
 def mock_uuid(mocker: MockerFixture):
     return mocker.patch("idt.repositories.uuid.uuid4", return_value="a-uuid")
 
@@ -79,3 +84,18 @@ class TestDeviceUsecases:
 
             assert device == expected
             assert device_uc.repo.store.devices == {expected.id: expected}
+
+    class TestDeleteDevice:
+        def test_not_there(self, device_uc: DeviceUsecases):
+            with pytest.raises(KeyError) as e:
+                device_uc.delete_device("not-here")
+
+            assert str(e.value) == "'not-here'"
+
+        def test_success(self, device_uc: DeviceUsecases, device: Device):
+            device.id = "id"
+            device_uc.repo.store.devices[device.id] = device
+
+            device_uc.delete_device("id")
+
+            assert device_uc.repo.store.devices == {}
