@@ -1,7 +1,7 @@
 from dataclasses import dataclass
-from typing import Callable, Sequence
+from typing import Sequence
 
-from idt.domains import Device, Dwelling, Hub
+from idt.domains import Device, Dwelling, Hub, TypeDevice
 from idt.repositories import DeviceRepository, DwellingRepository, HubRepository
 
 
@@ -9,7 +9,7 @@ from idt.repositories import DeviceRepository, DwellingRepository, HubRepository
 class DeviceUsecases:
     repo: DeviceRepository
 
-    def create_device(self, device_cls: Callable[..., Device], **kwargs) -> Device:
+    def create_device(self, device_cls: type[TypeDevice], **kwargs) -> TypeDevice:
         pass
 
     def delete_device(self, id_: str):
@@ -18,7 +18,7 @@ class DeviceUsecases:
     def show_device_info(self, id_: str) -> str:
         pass
 
-    def list_devices(self) -> Sequence[Device]:
+    def list_devices(self) -> Sequence[TypeDevice]:
         pass
 
     def update_device(self, id_: str, **kwargs) -> str:
@@ -29,13 +29,13 @@ class DeviceUsecases:
 class HubUsecases:
     repo: HubRepository
 
-    def list_hub_devices(self, id_: str) -> Sequence[Device]:
+    def list_hub_devices(self, id_: str) -> Sequence[TypeDevice]:
         pass
 
-    def pair_device_to_hub(self, device: Device, hub: Hub):
+    def pair_device_to_hub(self, device: TypeDevice, hub: Hub):
         pass
 
-    def unpair_device_from_hub(self, device: Device, hub: Hub):
+    def unpair_device_from_hub(self, device: TypeDevice, hub: Hub):
         pass
 
 

@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from typing import Mapping, Sequence
 import uuid
 
-from idt.domains import Device, Dwelling, Hub
+from idt.domains import Device, Dwelling, Hub, TypeDevice
 
 
 @dataclass
@@ -16,7 +16,7 @@ class Store:
 class DeviceRepository:
     store: Store
 
-    def create(self, device: Device):
+    def create(self, device: TypeDevice) -> TypeDevice:
         if device.id is not None:
             raise ValueError(f"Device exists: id={device.id}")
 
@@ -24,20 +24,20 @@ class DeviceRepository:
         self.save(device)
         return device
 
-    def delete(self, device: Device):
+    def delete(self, device: TypeDevice):
         if device.hub is not None:
             raise ValueError(
                 f"Device associated with a hub: id={device.id} hub_id={device.hub.id}"
             )
         del self.store.devices[device.id]
 
-    def get(self, id_: str) -> Device:
+    def get(self, id_: str) -> TypeDevice:
         return self.store.devices[id_]
 
-    def list(self) -> Sequence[Device]:
+    def list(self) -> Sequence[TypeDevice]:
         return [device for _, device in self.store.devices.items()]
 
-    def save(self, device: Device):
+    def save(self, device: TypeDevice):
         self.store.devices[device.id] = device
 
 

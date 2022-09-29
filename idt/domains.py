@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Mapping, Optional, Sequence
+from typing import Mapping, Optional, Sequence, TypeVar
+
+TypeDevice = TypeVar("TypeDevice", bound="Device")
 
 
 @dataclass(kw_only=True)
@@ -44,7 +46,7 @@ class Thermostat(Device):
 @dataclass(kw_only=True)
 class Hub:
     id: Optional[str] = None
-    devices: Mapping[str, Device] = field(default_factory=dict)
+    devices: Mapping[str, TypeDevice] = field(default_factory=dict)
     dwelling: Optional["Dwelling"] = None
 
     def __post_init__(self):
