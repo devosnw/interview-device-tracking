@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Sequence
 
-from idt.domains import Device, Dwelling, Hub, TypeDevice
+from idt.domains import Device, Dwelling, DwellingState, Hub, TypeDevice
 from idt.repositories import DeviceRepository, DwellingRepository, HubRepository
 
 
@@ -65,10 +65,14 @@ class DwellingUsecases:
         self.repo.save(dwelling)
 
     def list_dwellings(self) -> Sequence[Dwelling]:
-        pass
+        return self.repo.list()
 
     def occupy(self, id_: str):
-        pass
+        dwelling = self.repo.get(id_)
+        dwelling.state = DwellingState.OCCUPIED
+        self.repo.save(dwelling)
 
     def vacate(self, id_: str):
-        pass
+        dwelling = self.repo.get(id_)
+        dwelling.state = DwellingState.VACANT
+        self.repo.save(dwelling)

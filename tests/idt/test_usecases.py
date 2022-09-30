@@ -6,6 +6,7 @@ from idt.domains import (
     Device,
     Dimmer,
     Dwelling,
+    DwellingState,
     Hub,
     Lock,
     LockState,
@@ -286,7 +287,7 @@ class TestDwellingUsecases:
 
             assert str(e.value) == "'not-here'"
 
-        def test_hub_not_there(self, dwelling_uc: DwellingUsecases, dwelling: Hub):
+        def test_hub_not_there(self, dwelling_uc: DwellingUsecases, dwelling: Dwelling):
             dwelling.id = "id"
             dwelling_uc.repo.store.dwellings[dwelling.id] = dwelling
 
@@ -308,84 +309,50 @@ class TestDwellingUsecases:
             assert dwelling_uc.repo.store.dwellings["id"].hubs == {hub.id: hub}
             assert dwelling_uc.repo.store.hubs[hub.id].dwelling == dwelling
 
-    # class TestListDwellingDevices:
-    #     def test_not_there(self, dwelling_uc: DwellingUsecases):
-    #         with pytest.raises(KeyError) as e:
-    #             dwelling_uc.list_hub_devices("not-here")
+    class TestListDwellings:
+        def test_empty(self, dwelling_uc: DwellingUsecases):
+            assert dwelling_uc.list_dwellings() == []
 
-    #         assert str(e.value) == "'not-here'"
+        def test_some(self, dwelling_uc: DwellingUsecases):
+            dwelling_1 = Dwelling(id="1")
+            dwelling_2 = Dwelling(id="2")
+            dwelling_uc.repo.store.dwellings = {
+                dwelling_1.id: dwelling_1,
+                dwelling_2.id: dwelling_2,
+            }
 
-    #     def test_empty(self, dwelling_uc: DwellingUsecases, hub: Hub):
-    #         hub.id = "id"
-    #         dwelling_uc.repo.store.hubs[hub.id] = hub
+            assert dwelling_uc.list_dwellings() == [dwelling_1, dwelling_2]
 
-    #         assert dwelling_uc.list_hub_devices("id") == []
+    class TestOccupy:
+        def test_not_there(self, dwelling_uc: DwellingUsecases):
+            with pytest.raises(KeyError) as e:
+                dwelling_uc.occupy("not-here")
 
-    #     def test_some(self, dwelling_uc: DwellingUsecases):
-    #         device_1 = Device(id="1")
-    #         device_2 = Device(id="2")
-    #         hub = Hub(
-    #             id="id",
-    #             devices={
-    #                 device_1.id: device_1,
-    #                 device_2.id: device_2,
-    #             },
-    #         )
-    #         dwelling_uc.repo.store.hubs[hub.id] = hub
+            assert str(e.value) == "'not-here'"
 
-    #         assert dwelling_uc.list_hub_devices("id") == [device_1, device_2]
+        def test_success(self, dwelling_uc: DwellingUsecases, dwelling: Dwelling):
+            dwelling.id = "id"
+            dwelling.state = DwellingState.VACANT
+            dwelling_uc.repo.store.dwellings[dwelling.id] = dwelling
 
-    # class TestPairDevice:
-    #     def test_not_there(self, dwelling_uc: DwellingUsecases):
-    #         with pytest.raises(KeyError) as e:
-    #             dwelling_uc.pair_device("not-here", "")
+            dwelling_uc.occupy("id")
 
-    #         assert str(e.value) == "'not-here'"
+            assert (
+                dwelling_uc.repo.store.dwellings["id"].state == DwellingState.OCCUPIED
+            )
 
-    #     def test_device_not_there(self, dwelling_uc: DwellingUsecases, hub: Hub):
-    #         hub.id = "id"
-    #         dwelling_uc.repo.store.hubs[hub.id] = hub
+    class TestVacate:
+        def test_not_there(self, dwelling_uc: DwellingUsecases):
+            with pytest.raises(KeyError) as e:
+                dwelling_uc.vacate("not-here")
 
-    #         with pytest.raises(KeyError) as e:
-    #             dwelling_uc.pair_device("id", "not-here")
+            assert str(e.value) == "'not-here'"
 
-    #         assert str(e.value) == "'not-here'"
+        def test_success(self, dwelling_uc: DwellingUsecases, dwelling: Dwelling):
+            dwelling.id = "id"
+            dwelling.state = DwellingState.OCCUPIED
+            dwelling_uc.repo.store.dwellings[dwelling.id] = dwelling
 
-    #     def test_success(self, dwelling_uc: DwellingUsecases, hub: Hub, device: Device):
-    #         hub.id = "id"
-    #         dwelling_uc.repo.store.hubs[hub.id] = hub
-    #         device.id = "device-id"
-    #         dwelling_uc.device_repo.store.devices[device.id] = device
+            dwelling_uc.vacate("id")
 
-    #         dwelling_uc.pair_device("id", "device-id")
-
-    #         assert dwelling_uc.repo.store.hubs["id"].devices == {device.id: device}
-    #         assert dwelling_uc.device_repo.store.devices["device-id"].hub == hub
-
-    # class TestUnpairDevice:
-    #     def test_not_there(self, dwelling_uc: DwellingUsecases):
-    #         with pytest.raises(KeyError) as e:
-    #             dwelling_uc.unpair_device("not-here", "")
-
-    #         assert str(e.value) == "'not-here'"
-
-    #     def test_device_not_there(self, dwelling_uc: DwellingUsecases, hub: Hub):
-    #         hub.id = "id"
-    #         dwelling_uc.repo.store.hubs[hub.id] = hub
-
-    #         with pytest.raises(KeyError) as e:
-    #             dwelling_uc.unpair_device("id", "not-here")
-
-    #         assert str(e.value) == "'not-here'"
-
-    #     def test_success(self, dwelling_uc: DwellingUsecases, hub: Hub, device: Device):
-    #         device.id = "device-id"
-    #         hub.id = "id"
-    #         hub.pair_device(device)
-    #         dwelling_uc.device_repo.store.devices[device.id] = device
-    #         dwelling_uc.repo.store.hubs[hub.id] = hub
-
-    #         dwelling_uc.unpair_device("id", "device-id")
-
-    #         assert dwelling_uc.repo.store.hubs["id"].devices == {}
-    #         assert dwelling_uc.device_repo.store.devices["device-id"].hub is None
+            assert dwelling_uc.repo.store.dwellings["id"].state == DwellingState.VACANT

@@ -62,10 +62,16 @@ class Hub:
         del self.devices[device.id]
 
 
+class DwellingState(Enum):
+    VACANT = auto()
+    OCCUPIED = auto()
+
+
 @dataclass(kw_only=True)
 class Dwelling:
     id: Optional[str] = None
     hubs: Mapping[str, Hub] = field(default_factory=dict)
+    state: DwellingState = DwellingState.VACANT
 
     def __post_init__(self):
         for hub in self.hubs.values():
