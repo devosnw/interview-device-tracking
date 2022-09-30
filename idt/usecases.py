@@ -55,9 +55,14 @@ class HubUsecases:
 @dataclass
 class DwellingUsecases:
     repo: DwellingRepository
+    hub_repo: HubRepository
 
     def install_hub(self, id_: str, hub_id: str):
-        pass
+        dwelling = self.repo.get(id_)
+        hub = self.hub_repo.get(hub_id)
+
+        dwelling.install_hub(hub)
+        self.repo.save(dwelling)
 
     def list_dwellings(self) -> Sequence[Dwelling]:
         pass

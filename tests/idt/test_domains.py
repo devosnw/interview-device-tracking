@@ -106,3 +106,12 @@ class TestDwelling:
 
         for hub in dwelling.hubs.values():
             assert hub.dwelling == dwelling
+
+    def test_install_hub(self):
+        dwelling = Dwelling()
+        hub = Hub(id="hub-id")
+
+        dwelling.install_hub(hub)
+
+        assert dwelling.hubs == {"hub-id": hub}
+        assert hub.dwelling == dwelling

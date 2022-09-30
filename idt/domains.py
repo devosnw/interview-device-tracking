@@ -70,3 +70,7 @@ class Dwelling:
     def __post_init__(self):
         for hub in self.hubs.values():
             hub.dwelling = self
+
+    def install_hub(self, hub: Hub):
+        self.hubs[hub.id] = hub
+        hub.dwelling = self
