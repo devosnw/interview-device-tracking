@@ -1,16 +1,21 @@
+BLACK=black
+ISORT=isort
+PYTEST=pytest
 TEST=tests/
 TEST_OPTS=
 
+.DEFAULT_GOAL := test
+
 format:
-	isort --profile=black .
-	black .
+	$(ISORT) --profile=black .
+	$(BLACK) .
 
 lint:
-	isort --check --profile=black .
-	black --check .
+	$(ISORT) --check --profile=black .
+	$(BLACK) --check .
 
 solution:
-	pytest tests/solution.py
+	$(PYTEST) tests/solution.py
 
 test:
-	pytest $(TEST_OPTS) $(TEST)
+	$(PYTEST) $(TEST_OPTS) $(TEST)
