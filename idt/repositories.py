@@ -1,6 +1,6 @@
+import uuid
 from dataclasses import dataclass, field
 from typing import Mapping, Sequence
-import uuid
 
 from idt.domains import Dwelling, Hub, TypeDevice
 

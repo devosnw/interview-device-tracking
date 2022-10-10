@@ -3,13 +3,13 @@ import pytest
 from idt.domains import (
     Device,
     Dimmer,
+    Dwelling,
+    Hub,
     Lock,
     LockState,
     Switch,
     SwitchState,
     Thermostat,
-    Hub,
-    Dwelling,
 )
 
 
