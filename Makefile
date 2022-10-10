@@ -1,6 +1,9 @@
 TEST=tests/
 TEST_OPTS=
 
+lint:
+	black --check .
+
 solution:
 	pytest tests/solution.py
 

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Sequence
 
-from idt.domains import Device, Dwelling, DwellingState, Hub, TypeDevice
+from idt.domains import Dwelling, DwellingState, TypeDevice
 from idt.repositories import DeviceRepository, DwellingRepository, HubRepository
 
 

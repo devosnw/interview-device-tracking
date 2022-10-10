@@ -2,12 +2,12 @@ from dataclasses import dataclass, field
 from typing import Mapping, Sequence
 import uuid
 
-from idt.domains import Device, Dwelling, Hub, TypeDevice
+from idt.domains import Dwelling, Hub, TypeDevice
 
 
 @dataclass
 class Store:
-    devices: Mapping[str, Device] = field(default_factory=dict)
+    devices: Mapping[str, TypeDevice] = field(default_factory=dict)
     dwellings: Mapping[str, Dwelling] = field(default_factory=dict)
     hubs: Mapping[str, Hub] = field(default_factory=dict)
 
